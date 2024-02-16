@@ -1,0 +1,122 @@
+-- ***Examples
+
+CREATE OR REPLACE PROCEDURE ADD_NOVO_JOGADOR (
+  JOGADOR_ID_IN IN NUMBER,
+  JOGADOR_NAME_IN IN VARCHAR2,
+  JOGADOR_POS_IN IN NUMBER,
+  JOGADOR_APELIDO_IN IN VARCHAR2
+) IS
+BEGIN
+  INSERT INTO JOGADOR (
+    ID_JOGADOR,
+    NOME,
+    POSICAO,
+    NICKNAME
+  ) VALUES(
+    JOGADOR_ID_IN,
+    JOGADOR_NAME_IN,
+    JOGADOR_POS_IN,
+    JOGADOR_APELIDO_IN
+  );
+EXCEPTION
+  WHEN DUP_VAL_ON_INDEX THEN
+    RAISE_APPLICATION_ERROR(-20001, 'PLAYER DUPLICATE CODE!');
+  WHEN OTHERS THEN
+    RAISE_APPLICATION_ERROR(-20001, 'SOME ERROR IS HAPPENED ON INSERTING PLAYER');
+END;
+
+SELECT
+  *
+FROM
+  JOGADOR;
+SELECT
+  *
+FROM
+  TB_LOG;
+EXEC ADD_NOVO_JOGADOR (4, 'JOGADOR 4', 1, 'APELIDO 4');
+EXEC ADD_NOVO_JOGADOR (2, 'JOGADOR 2', 2, 'APELIDO 2');
+EXEC ADD_NOVO_JOGADOR (7, 'JOGADOR 7', 7, 'APELIDO 7');
+UPDATE HR.JOGADOR
+SET
+  NOME = 'NOVO JOGADOR'
+WHERE
+  ID_JOGADOR = 7;
+ -- TRIGGER (GATILHO)
+CREATE TABLE TB_LOG( DATA_LOG TIMESTAMP DEFAULT SYSDATE, USER_LOG VARCHAR2(30), DESC_LOG VARCHAR2(300) );
+CREATE OR REPLACE TRIGGER TG_JOGADOR AFTER INSERT OR DELETE OR UPDATE ON JOGADOR FOR EACH ROW ENABLE DECLARE V_USER VARCHAR2(
+  30
+);
+BEGIN
+  SELECT
+    USER INTO V_USER
+  FROM
+    DUAL;
+  IF INSERTING THEN
+    INSERT INTO TB_LOG(
+      USER_LOG,
+      DESC_LOG
+    ) VALUES (
+      V_USER,
+      'INSERTED REGISTER'
+    );
+  ELSIF DELETING THEN
+    INSERT INTO TB_LOG(
+      USER_LOG,
+      DESC_LOG
+    ) VALUES (
+      V_USER,
+      'DELETED REGISTER'
+    );
+  ELSIF UPDATING THEN
+    INSERT INTO TB_LOG(
+      USER_LOG,
+      DESC_LOG
+    ) VALUES (
+      V_USER,
+      'CHANGED REGISTER'
+    );
+  END IF;
+END;
+ -- Function
+CREATE OR REPLACE FUNCTION PRIMEIRO_NOME_FUNC RETURN VARCHAR2 IS
+  V_EMP_NOME VARCHAR2(100);
+BEGIN
+  SELECT
+    FIRST_NAME INTO V_EMP_NOME
+  FROM
+    HR.EMPLOYEES
+  WHERE
+    EMPLOYEE_ID = 105;
+  RETURN V_EMP_NOME;
+END;
+
+SELECT
+  PRIMEIRO_NOME_FUNC
+FROM
+  DUAL;
+
+
+
+-- *** Atividades
+-- Qual das funções abaixo de nome fn_mes_extenso recebe o número do mês e retorna o nome do mês por extenso?
+REATE OR REPLACE FUNCTION fn_mes_extenso(p_mes number) 
+RETURN varchar IS v_mes varchar(30); 
+BEGIN 
+  CASE 
+    WHEN p_mes= 1 THEN v_mes := 'Janeiro'; 
+     WHEN p_mes= 2 THEN v_mes := 'Fevereiro'; 
+     WHEN p_mes= 3 THEN v_mes := 'Março';
+      WHEN p_mes= 4 THEN v_mes := 'Abril'; 
+      WHEN p_mes= 5 THEN v_mes := 'Maio'; 
+      WHEN p_mes= 6 THEN v_mes := 'Junho'; 
+      WHEN p_mes= 7 THEN v_mes := 'Julho'; 
+      WHEN p_mes= 8 THEN v_mes := 'Agosto'; 
+      WHEN p_mes= 9 THEN v_mes := 'Setembro'; 
+      WHEN p_mes=10 THEN v_mes := 'Outubro'; 
+      WHEN p_mes=11 THEN v_mes := 'Novembro'; 
+      WHEN p_mes=12 THEN v_mes := 'Dezembro'; 
+      ELSE v_mes := 'Inválido!'; 
+    END CASE; 
+  RETURN v_mes;
+END;
+
